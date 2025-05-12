@@ -16,13 +16,13 @@ options:
     output_language: python
     placement: (0,0)
     qt_qss_theme: ''
-    realtime_scheduling: ''
+    realtime_scheduling: '1'
     run: 'True'
     run_command: '{python} -u {filename}'
     run_options: prompt
     sizing_mode: fixed
     thread_safe_setters: ''
-    title: Not titled yet
+    title: Walkie Talkie
     window_size: (1000,1000)
   states:
     bus_sink: false
@@ -41,83 +41,133 @@ blocks:
     label: RF Gain
     min_len: '200'
     orient: QtCore.Qt.Horizontal
+    outputmsgname: value
     rangeType: float
+    showports: 'False'
     start: '0'
     step: '1'
     stop: '76'
-    value: '36'
+    value: '20'
     widget: counter_slider
   states:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [488, 48.0]
+    coordinate: [408, 0.0]
     rotation: 0
     state: true
 - name: samp_rate
-  id: variable_qtgui_range
+  id: variable
   parameters:
     comment: ''
-    gui_hint: ''
-    label: Sample Rate
-    min_len: '200'
-    orient: QtCore.Qt.Horizontal
-    rangeType: float
-    start: '192000'
-    step: '1'
-    stop: '56000000'
-    value: '1920000'
-    widget: counter_slider
+    value: '384000'
   states:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [192, 40.0]
+    coordinate: [16, 120.0]
+    rotation: 0
+    state: true
+- name: selected_channel
+  id: variable_qtgui_chooser
+  parameters:
+    comment: ''
+    gui_hint: ''
+    label: Channel
+    label0: ''
+    label1: ''
+    label2: ''
+    label3: ''
+    label4: ''
+    labels: '["Channel 1", "Channel 2", "Channel 3", "Channel 4", "Channel 5", "Channel
+      6", "Channel 7", "Channel 8", ]'
+    num_opts: '0'
+    option0: '0'
+    option1: '1'
+    option2: '2'
+    option3: '3'
+    option4: '4'
+    options: '[0,1, 2,3,4,5,6,7]'
+    orient: Qt.QHBoxLayout
+    type: int
+    value: '0'
+    widget: radio_buttons
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [240, 8.0]
     rotation: 0
     state: true
 - name: tuning
-  id: variable_qtgui_range
+  id: variable
   parameters:
     comment: ''
-    gui_hint: ''
-    label: Frequency
-    min_len: '200'
-    orient: QtCore.Qt.Horizontal
-    rangeType: float
-    start: '8750'
-    step: '5'
-    stop: '10800'
-    value: '9405'
-    widget: counter_slider
+    value: 446000000+12500+6250-1000
   states:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [336, 32.0]
+    coordinate: [120, 120.0]
     rotation: 0
     state: true
-- name: analog_fm_demod_cf_0
-  id: analog_fm_demod_cf
+- name: analog_ctcss_squelch_ff_0
+  id: analog_ctcss_squelch_ff
   parameters:
     affinity: ''
     alias: ''
-    audio_decim: '8'
-    audio_pass: '16000'
-    audio_stop: '20000'
-    chan_rate: '384000'
     comment: ''
-    deviation: '75000'
-    gain: '1.0'
+    freq: '100'
+    gate: 'False'
+    len: '0'
+    level: '0.01'
     maxoutbuf: '0'
     minoutbuf: '0'
+    ramp: '0'
+    rate: '48000'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1528, 152.0]
+    rotation: 0
+    state: disabled
+- name: analog_nbfm_rx_0
+  id: analog_nbfm_rx
+  parameters:
+    affinity: ''
+    alias: ''
+    audio_rate: '48000'
+    comment: ''
+    max_dev: 6e3
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    quad_rate: '192000'
     tau: 75e-6
   states:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [912, 220.0]
+    coordinate: [952, 400.0]
     rotation: 0
     state: true
+- name: analog_simple_squelch_cc_0
+  id: analog_simple_squelch_cc
+  parameters:
+    affinity: ''
+    alias: ''
+    alpha: '1'
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    threshold: '-50'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [760, 416.0]
+    rotation: 0
+    state: enabled
 - name: audio_sink_0
   id: audio_sink
   parameters:
@@ -132,7 +182,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1344, 200.0]
+    coordinate: [1312, 424.0]
     rotation: 0
     state: true
 - name: blocks_multiply_const_vxx_0
@@ -150,27 +200,99 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1144, 224.0]
+    coordinate: [1144, 424.0]
     rotation: 0
     state: true
-- name: qtgui_sink_x_0
+- name: high_pass_filter_0
+  id: high_pass_filter
+  parameters:
+    affinity: ''
+    alias: ''
+    beta: '6.76'
+    comment: ''
+    cutoff_freq: '300'
+    decim: '1'
+    gain: '1'
+    interp: '1'
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    samp_rate: '48000'
+    type: fir_filter_fff
+    width: '20'
+    win: window.WIN_HAMMING
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1720, 148.0]
+    rotation: 0
+    state: disabled
+- name: low_pass_filter_0_1
+  id: low_pass_filter
+  parameters:
+    affinity: ''
+    alias: ''
+    beta: '6.76'
+    comment: ''
+    cutoff_freq: '6000'
+    decim: '2'
+    gain: '1'
+    interp: '1'
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    samp_rate: samp_rate
+    type: fir_filter_ccf
+    width: '1000'
+    win: window.WIN_HAMMING
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [560, 372.0]
+    rotation: 0
+    state: enabled
+- name: low_pass_filter_0_1_0
+  id: low_pass_filter
+  parameters:
+    affinity: ''
+    alias: ''
+    beta: '6.76'
+    comment: ''
+    cutoff_freq: '3000'
+    decim: '1'
+    gain: '1'
+    interp: '1'
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    samp_rate: '48000'
+    type: fir_filter_fff
+    width: '100'
+    win: window.WIN_HAMMING
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1328, 140.0]
+    rotation: 0
+    state: disabled
+- name: qtgui_sink_x_0_1_0_0
   id: qtgui_sink_x
   parameters:
     affinity: ''
     alias: ''
     bw: samp_rate
     comment: ''
-    fc: tuning*10000
-    fftsize: '32768'
+    fc: tuning
+    fftsize: '8192'
     gui_hint: ''
     maxoutbuf: '0'
     minoutbuf: '0'
-    name: '"Spectrum Analyzer"'
+    name: '"Shifted Freq"'
     plotconst: 'True'
     plotfreq: 'True'
     plottime: 'True'
     plotwaterfall: 'True'
-    rate: '30'
+    rate: '100'
     showports: 'False'
     showrf: 'True'
     type: complex
@@ -179,29 +301,96 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [792, 424.0]
+    coordinate: [536, 208.0]
     rotation: 0
-    state: true
-- name: rational_resampler_xxx_0
-  id: rational_resampler_xxx
+    state: enabled
+- name: qtgui_sink_x_0_1_0_0_0
+  id: qtgui_sink_x
   parameters:
     affinity: ''
     alias: ''
+    bw: samp_rate
     comment: ''
-    decim: '5'
-    fbw: '0'
-    interp: '1'
+    fc: tuning
+    fftsize: '8192'
+    gui_hint: ''
     maxoutbuf: '0'
     minoutbuf: '0'
-    taps: '[]'
-    type: ccc
+    name: '"Shifted Freq"'
+    plotconst: 'True'
+    plotfreq: 'True'
+    plottime: 'True'
+    plotwaterfall: 'True'
+    rate: '100'
+    showports: 'False'
+    showrf: 'True'
+    type: complex
+    wintype: window.WIN_BLACKMAN_hARRIS
   states:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [640, 312.0]
+    coordinate: [760, 280.0]
     rotation: 0
-    state: true
+    state: enabled
+- name: qtgui_sink_x_0_1_0_0_1
+  id: qtgui_sink_x
+  parameters:
+    affinity: ''
+    alias: ''
+    bw: '48000'
+    comment: ''
+    fc: '0'
+    fftsize: '8192'
+    gui_hint: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    name: '"Shifted Freq"'
+    plotconst: 'True'
+    plotfreq: 'True'
+    plottime: 'True'
+    plotwaterfall: 'True'
+    rate: '100'
+    showports: 'False'
+    showrf: 'False'
+    type: float
+    wintype: window.WIN_BLACKMAN_hARRIS
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1552, 312.0]
+    rotation: 0
+    state: disabled
+- name: qtgui_sink_x_0_1_0_0_1_0
+  id: qtgui_sink_x
+  parameters:
+    affinity: ''
+    alias: ''
+    bw: '48000'
+    comment: ''
+    fc: '0'
+    fftsize: '8192'
+    gui_hint: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    name: '"Shifted Freq"'
+    plotconst: 'True'
+    plotfreq: 'True'
+    plottime: 'True'
+    plotwaterfall: 'True'
+    rate: '100'
+    showports: 'False'
+    showrf: 'False'
+    type: float
+    wintype: window.WIN_BLACKMAN_hARRIS
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1192, 496.0]
+    rotation: 0
+    state: enabled
 - name: uhd_usrp_source_0
   id: uhd_usrp_source
   parameters:
@@ -271,7 +460,7 @@ blocks:
     bw7: '0'
     bw8: '0'
     bw9: '0'
-    center_freq0: tuning*10000
+    center_freq0: tuning
     center_freq1: '0'
     center_freq10: '0'
     center_freq11: '0'
@@ -635,17 +824,24 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [384, 392.0]
+    coordinate: [312, 372.0]
     rotation: 0
     state: true
 
 connections:
-- [analog_fm_demod_cf_0, '0', blocks_multiply_const_vxx_0, '0']
+- [analog_ctcss_squelch_ff_0, '0', high_pass_filter_0, '0']
+- [analog_nbfm_rx_0, '0', blocks_multiply_const_vxx_0, '0']
+- [analog_nbfm_rx_0, '0', low_pass_filter_0_1_0, '0']
+- [analog_nbfm_rx_0, '0', qtgui_sink_x_0_1_0_0_1_0, '0']
+- [analog_simple_squelch_cc_0, '0', analog_nbfm_rx_0, '0']
 - [blocks_multiply_const_vxx_0, '0', audio_sink_0, '0']
-- [rational_resampler_xxx_0, '0', analog_fm_demod_cf_0, '0']
-- [uhd_usrp_source_0, '0', qtgui_sink_x_0, '0']
-- [uhd_usrp_source_0, '0', rational_resampler_xxx_0, '0']
+- [high_pass_filter_0, '0', qtgui_sink_x_0_1_0_0_1, '0']
+- [low_pass_filter_0_1, '0', analog_simple_squelch_cc_0, '0']
+- [low_pass_filter_0_1, '0', qtgui_sink_x_0_1_0_0_0, '0']
+- [low_pass_filter_0_1_0, '0', analog_ctcss_squelch_ff_0, '0']
+- [uhd_usrp_source_0, '0', low_pass_filter_0_1, '0']
+- [uhd_usrp_source_0, '0', qtgui_sink_x_0_1_0_0, '0']
 
 metadata:
   file_format: 1
-  grc_version: 3.10.9.2
+  grc_version: 3.10.4.0

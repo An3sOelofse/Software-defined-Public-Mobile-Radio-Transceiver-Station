@@ -41,11 +41,13 @@ blocks:
     label: RF Gain
     min_len: '200'
     orient: QtCore.Qt.Horizontal
+    outputmsgname: value
     rangeType: float
+    showports: 'False'
     start: '0'
     step: '1'
     stop: '76'
-    value: '36'
+    value: '50'
     widget: counter_slider
   states:
     bus_sink: false
@@ -62,7 +64,9 @@ blocks:
     label: Sample Rate
     min_len: '200'
     orient: QtCore.Qt.Horizontal
+    outputmsgname: value
     rangeType: float
+    showports: 'False'
     start: '192000'
     step: '1'
     stop: '56000000'
@@ -83,11 +87,13 @@ blocks:
     label: Frequency
     min_len: '200'
     orient: QtCore.Qt.Horizontal
+    outputmsgname: value
     rangeType: float
-    start: '8750'
-    step: '5'
-    stop: '10800'
-    value: '9405'
+    showports: 'False'
+    start: '70000000'
+    step: '200000'
+    stop: '6000000000'
+    value: '446000000'
     widget: counter_slider
   states:
     bus_sink: false
@@ -141,7 +147,7 @@ blocks:
     affinity: ''
     alias: ''
     comment: ''
-    const: '0.5'
+    const: '0.3'
     maxoutbuf: '0'
     minoutbuf: '0'
     type: float
@@ -160,8 +166,8 @@ blocks:
     alias: ''
     bw: samp_rate
     comment: ''
-    fc: tuning*10000
-    fftsize: '32768'
+    fc: tuning
+    fftsize: '1024'
     gui_hint: ''
     maxoutbuf: '0'
     minoutbuf: '0'
@@ -170,9 +176,9 @@ blocks:
     plotfreq: 'True'
     plottime: 'True'
     plotwaterfall: 'True'
-    rate: '30'
+    rate: '100'
     showports: 'False'
-    showrf: 'True'
+    showrf: 'False'
     type: complex
     wintype: window.WIN_BLACKMAN_hARRIS
   states:
@@ -271,7 +277,7 @@ blocks:
     bw7: '0'
     bw8: '0'
     bw9: '0'
-    center_freq0: tuning*10000
+    center_freq0: tuning
     center_freq1: '0'
     center_freq10: '0'
     center_freq11: '0'
@@ -648,4 +654,4 @@ connections:
 
 metadata:
   file_format: 1
-  grc_version: 3.10.9.2
+  grc_version: 3.10.4.0

@@ -33,23 +33,6 @@ options:
     state: enabled
 
 blocks:
-- name: DCS_code_value
-  id: parameter
-  parameters:
-    alias: ''
-    comment: ''
-    hide: none
-    label: DCS Code
-    short_id: ''
-    type: ''
-    value: '0'
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [472, 8.0]
-    rotation: 0
-    state: true
 - name: audio_sample_rate
   id: parameter
   parameters:
@@ -64,7 +47,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [336, 8.0]
+    coordinate: [408, 16.0]
     rotation: 0
     state: true
 - name: blocks_add_const_vxx_0
@@ -82,7 +65,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [328, 264.0]
+    coordinate: [472, 320.0]
     rotation: 0
     state: enabled
 - name: blocks_add_xx_0
@@ -100,7 +83,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1048, 160.0]
+    coordinate: [1192, 216.0]
     rotation: 0
     state: enabled
 - name: blocks_char_to_float_1
@@ -117,7 +100,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [184, 264.0]
+    coordinate: [328, 320.0]
     rotation: 0
     state: enabled
 - name: blocks_moving_average_xx_0_0
@@ -137,7 +120,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [672, 240.0]
+    coordinate: [816, 296.0]
     rotation: 0
     state: enabled
 - name: blocks_multiply_const_vxx_1
@@ -155,7 +138,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [264, 152.0]
+    coordinate: [408, 208.0]
     rotation: 0
     state: true
 - name: blocks_multiply_const_vxx_1_0
@@ -165,7 +148,7 @@ blocks:
     alias: ''
     comment: ''
     const: 0.07*dcs_active
-    maxoutbuf: '10000'
+    maxoutbuf: '0'
     minoutbuf: '0'
     type: float
     vlen: '1'
@@ -173,7 +156,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [856, 264.0]
+    coordinate: [1000, 320.0]
     rotation: 0
     state: enabled
 - name: dcs_active
@@ -190,7 +173,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [184, 8.0]
+    coordinate: [208, 8.0]
     rotation: 0
     state: true
 - name: epy_block_0
@@ -202,7 +185,7 @@ blocks:
       \ them are required to have default values!\n\"\"\"\n\nimport numpy as np\n\
       from gnuradio import gr\n\n\nclass blk(gr.sync_block):  # other base classes\
       \ are basic_block, decim_block, interp_block\n    \"\"\"Embedded Python Block\
-      \ example - a simple multiply const\"\"\"\n\n    def __init__(self, dcs_code=0,audio_rate=48000):\
+      \ example - a simple multiply const\"\"\"\n\n    def __init__(self, dcs_code=0):\
       \  # only default arguments here\n        \"\"\"arguments to this function show\
       \ up as parameters in GRC\"\"\"\n        gr.sync_block.__init__(\n         \
       \   self,\n            name='DCS Generator',   # will show up in GRC\n     \
@@ -210,34 +193,28 @@ blocks:
       \ attribute with the same name as a parameter is found,\n        # a callback\
       \ is registered (properties work, too).\n        self.stored_codes = [np.array([0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]),\n\
       \                             np.array([0,1,1,0,0,0,1,1,1,0,0,1,1,0,0,1,0,0,0,0,0,0,1])]\n\
-      \        self.dcs_code = int(dcs_code)\n        self.audio_rate = audio_rate\n\
-      \        # self.selected_code = [[0,1,1,0,0,0,1,1,1,0,0,1,1,0,0,1,0,0,0,0,0,0,1]]\n\
-      \        \n        self.selected_code = [self.stored_codes[self.dcs_code]]\n\
-      \        self.long_code = np.repeat(self.selected_code,178,axis=1)\n       \
-      \ print(self.long_code[0])\n        self.lastIndex = 0\n\n    def set_dcs_code(self,\
-      \ dcs_code=0):\n        self.dcs_code = dcs_code\n        self.selected_code\
-      \ = [self.stored_codes[self.dcs_code]]\n        self.long_code = np.repeat(self.selected_code,178,axis=1)\n\
-      \        \n    def work(self,input_items, output_items):\n        \"\"\"example:\
-      \ multiply with constant\"\"\"\n        out = output_items[0]\n        length\
-      \ = len(out)\n\n        if(self.lastIndex+length >= 4094-1):\n            self.lastIndex\
-      \ = self.lastIndex % 23 \n\n        out[:] = self.long_code[0][self.lastIndex:self.lastIndex+length]\n\
+      \        self.dcs_code = int(dcs_code)\n\n        # self.selected_code = [[0,1,1,0,0,0,1,1,1,0,0,1,1,0,0,1,0,0,0,0,0,0,1]]\n\
+      \        self.selected_code = [self.stored_codes[self.dcs_code]]\n        self.long_code\
+      \ = np.repeat(self.selected_code,178,axis=1)\n        print(self.long_code[0])\n\
+      \        self.lastIndex = 0\n\n    def work(self,input_items, output_items):\n\
+      \        \"\"\"example: multiply with constant\"\"\"\n        out = output_items[0]\n\
+      \        length = len(out)\n\n        if(self.lastIndex+length >= 4094-1):\n\
+      \            self.lastIndex = self.lastIndex % 23 \n\n        out[:] = self.long_code[0][self.lastIndex:self.lastIndex+length]\n\
       \        self.lastIndex = self.lastIndex + length \n\n        \n\n       \n\
-      \        return length\n\n"
+      \        return length\n"
     affinity: ''
     alias: ''
-    audio_rate: audio_sample_rate
     comment: ''
-    dcs_code: DCS_code_value
+    dcs_code: '1.0'
     maxoutbuf: '4094'
     minoutbuf: '0'
   states:
-    _io_cache: ('DCS Generator', 'blk', [('dcs_code', '0'), ('audio_rate', '48000')],
-      [], [('0', 'byte', 1)], 'Embedded Python Block example - a simple multiply const',
-      ['audio_rate', 'dcs_code'])
+    _io_cache: ('DCS Generator', 'blk', [('dcs_code', '0')], [], [('0', 'byte', 1)],
+      'Embedded Python Block example - a simple multiply const', ['dcs_code'])
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [24, 256.0]
+    coordinate: [168, 320.0]
     rotation: 0
     state: enabled
 - name: low_pass_filter_0_0
@@ -261,7 +238,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [496, 212.0]
+    coordinate: [640, 268.0]
     rotation: 0
     state: enabled
 - name: pad_sink_0
@@ -279,7 +256,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1152, 168.0]
+    coordinate: [1296, 224.0]
     rotation: 0
     state: true
 - name: pad_source_0
@@ -299,7 +276,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [16, 152.0]
+    coordinate: [160, 208.0]
     rotation: 0
     state: true
 

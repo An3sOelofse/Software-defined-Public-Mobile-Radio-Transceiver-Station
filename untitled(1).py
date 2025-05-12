@@ -6,38 +6,52 @@
 #
 # GNU Radio Python Flow Graph
 # Title: Walkie Talkie
-# GNU Radio version: 3.10.9.2
+# GNU Radio version: 3.10.4.0
 
-from PyQt5 import Qt
-from gnuradio import qtgui
+from packaging.version import Version as StrictVersion
+
+if __name__ == '__main__':
+    import ctypes
+    import sys
+    if sys.platform.startswith('linux'):
+        try:
+            x11 = ctypes.cdll.LoadLibrary('libX11.so')
+            x11.XInitThreads()
+        except:
+            print("Warning: failed to XInitThreads()")
+
 import os
 import sys
 sys.path.append(os.environ.get('GRC_HIER_PATH', os.path.expanduser('~/.grc_gnuradio')))
 
-from PyQt5 import QtCore
+from PyQt5 import Qt
 from PyQt5.QtCore import QObject, pyqtSlot
+from gnuradio import qtgui
+from gnuradio.filter import firdes
+import sip
 from dcss_generation import dcss_generation  # grc-generated hier_block
 from gnuradio import analog
 from gnuradio import audio
 from gnuradio import blocks
 from gnuradio import digital
 from gnuradio import filter
-from gnuradio.filter import firdes
 from gnuradio import gr
 from gnuradio.fft import window
 import signal
-from PyQt5 import Qt
 from argparse import ArgumentParser
 from gnuradio.eng_arg import eng_float, intx
 from gnuradio import eng_notation
 from gnuradio import uhd
 import time
+from gnuradio.qtgui import Range, GrRangeWidget
+from PyQt5 import QtCore
 from pmr_channel_demod import pmr_channel_demod  # grc-generated hier_block
-import sip
 import untitled_epy_block_0 as epy_block_0  # embedded python block
 import untitled_epy_block_1 as epy_block_1  # embedded python block
 
 
+
+from gnuradio import qtgui
 
 class untitled(gr.top_block, Qt.QWidget):
 
@@ -48,8 +62,8 @@ class untitled(gr.top_block, Qt.QWidget):
         qtgui.util.check_set_qss()
         try:
             self.setWindowIcon(Qt.QIcon.fromTheme('gnuradio-grc'))
-        except BaseException as exc:
-            print(f"Qt GUI: Could not set Icon: {str(exc)}", file=sys.stderr)
+        except:
+            pass
         self.top_scroll_layout = Qt.QVBoxLayout()
         self.setLayout(self.top_scroll_layout)
         self.top_scroll = Qt.QScrollArea()
@@ -65,11 +79,12 @@ class untitled(gr.top_block, Qt.QWidget):
         self.settings = Qt.QSettings("GNU Radio", "untitled")
 
         try:
-            geometry = self.settings.value("geometry")
-            if geometry:
-                self.restoreGeometry(geometry)
-        except BaseException as exc:
-            print(f"Qt GUI: Could not restore geometry: {str(exc)}", file=sys.stderr)
+            if StrictVersion(Qt.qVersion()) < StrictVersion("5.0.0"):
+                self.restoreGeometry(self.settings.value("geometry").toByteArray())
+            else:
+                self.restoreGeometry(self.settings.value("geometry"))
+        except:
+            pass
 
         ##################################################
         # Variables
@@ -86,7 +101,6 @@ class untitled(gr.top_block, Qt.QWidget):
         ##################################################
         # Blocks
         ##################################################
-
         # Create the options list
         self._selected_channel_options = [1, 2, 3, 4, 5, 6, 7, 8]
         # Create the labels list
@@ -112,11 +126,29 @@ class untitled(gr.top_block, Qt.QWidget):
         self._selected_channel_button_group.buttonClicked[int].connect(
             lambda i: self.set_selected_channel(self._selected_channel_options[i]))
         self.top_layout.addWidget(self._selected_channel_group_box)
-        self._rf_gain_tx_range = qtgui.Range(0, 76, 1, 60, 200)
-        self._rf_gain_tx_win = qtgui.RangeWidget(self._rf_gain_tx_range, self.set_rf_gain_tx, "Transmit Gain", "counter_slider", float, QtCore.Qt.Horizontal)
+        # Create the options list
+        self._selected_DCS_options = [0, 1]
+        # Create the labels list
+        self._selected_DCS_labels = ['OFF', 'D023N']
+        # Create the combo box
+        self._selected_DCS_tool_bar = Qt.QToolBar(self)
+        self._selected_DCS_tool_bar.addWidget(Qt.QLabel("DCS Tone" + ": "))
+        self._selected_DCS_combo_box = Qt.QComboBox()
+        self._selected_DCS_tool_bar.addWidget(self._selected_DCS_combo_box)
+        for _label in self._selected_DCS_labels: self._selected_DCS_combo_box.addItem(_label)
+        self._selected_DCS_callback = lambda i: Qt.QMetaObject.invokeMethod(self._selected_DCS_combo_box, "setCurrentIndex", Qt.Q_ARG("int", self._selected_DCS_options.index(i)))
+        self._selected_DCS_callback(self.selected_DCS)
+        self._selected_DCS_combo_box.currentIndexChanged.connect(
+            lambda i: self.set_selected_DCS(self._selected_DCS_options[i]))
+        # Create the radio buttons
+        self.top_layout.addWidget(self._selected_DCS_tool_bar)
+        self._rf_gain_tx_range = Range(0, 76, 1, 60, 200)
+        self._rf_gain_tx_win = GrRangeWidget(self._rf_gain_tx_range, self.set_rf_gain_tx, "Transmit Gain", "counter_slider", float, QtCore.Qt.Horizontal, "value")
+
         self.top_layout.addWidget(self._rf_gain_tx_win)
-        self._rf_gain_range = qtgui.Range(0, 76, 1, 30, 200)
-        self._rf_gain_win = qtgui.RangeWidget(self._rf_gain_range, self.set_rf_gain, "RF Gain", "counter_slider", float, QtCore.Qt.Horizontal)
+        self._rf_gain_range = Range(0, 76, 1, 30, 200)
+        self._rf_gain_win = GrRangeWidget(self._rf_gain_range, self.set_rf_gain, "RF Gain", "counter_slider", float, QtCore.Qt.Horizontal, "value")
+
         self.top_layout.addWidget(self._rf_gain_win)
         _PTT_push_button = Qt.QPushButton('Push To Talk')
         _PTT_push_button = Qt.QPushButton('Push To Talk')
@@ -124,10 +156,15 @@ class untitled(gr.top_block, Qt.QWidget):
         _PTT_push_button.pressed.connect(lambda: self.set_PTT(self._PTT_choices['Pressed']))
         _PTT_push_button.released.connect(lambda: self.set_PTT(self._PTT_choices['Released']))
         self.top_layout.addWidget(_PTT_push_button)
-        self._DCS_choices = {'Pressed': 1, 'Released': 0}
+        if int == bool:
+        	self._DCS_choices = {'Pressed': bool(1), 'Released': bool(0)}
+        elif int == str:
+        	self._DCS_choices = {'Pressed': "1".replace("'",""), 'Released': "0".replace("'","")}
+        else:
+        	self._DCS_choices = {'Pressed': 1, 'Released': 0}
 
-        _DCS_toggle_button = qtgui.ToggleButton(self.set_DCS, 'DCS', self._DCS_choices, True, 'value')
-        _DCS_toggle_button.setColors("gray", "white", "green", "white")
+        _DCS_toggle_button = qtgui.ToggleButton(self.set_DCS, 'DCS', self._DCS_choices, True,"'value'".replace("'",""))
+        _DCS_toggle_button.setColors("gray","white","green","white")
         self.DCS = _DCS_toggle_button
 
         self.top_layout.addWidget(_DCS_toggle_button)
@@ -164,22 +201,6 @@ class untitled(gr.top_block, Qt.QWidget):
         self.uhd_usrp_sink_0.set_antenna("TX/RX", 0)
         self.uhd_usrp_sink_0.set_bandwidth(200000, 0)
         self.uhd_usrp_sink_0.set_gain(rf_gain_tx*PTT-(1-PTT)*30, 0)
-        # Create the options list
-        self._selected_DCS_options = [0, 1]
-        # Create the labels list
-        self._selected_DCS_labels = ['OFF', 'D023N']
-        # Create the combo box
-        self._selected_DCS_tool_bar = Qt.QToolBar(self)
-        self._selected_DCS_tool_bar.addWidget(Qt.QLabel("DCS Tone" + ": "))
-        self._selected_DCS_combo_box = Qt.QComboBox()
-        self._selected_DCS_tool_bar.addWidget(self._selected_DCS_combo_box)
-        for _label in self._selected_DCS_labels: self._selected_DCS_combo_box.addItem(_label)
-        self._selected_DCS_callback = lambda i: Qt.QMetaObject.invokeMethod(self._selected_DCS_combo_box, "setCurrentIndex", Qt.Q_ARG("int", self._selected_DCS_options.index(i)))
-        self._selected_DCS_callback(self.selected_DCS)
-        self._selected_DCS_combo_box.currentIndexChanged.connect(
-            lambda i: self.set_selected_DCS(self._selected_DCS_options[i]))
-        # Create the radio buttons
-        self.top_layout.addWidget(self._selected_DCS_tool_bar)
         self.qtgui_sink_x_0_1_0_0_0_0_1 = qtgui.sink_c(
             8192, #fftsize
             window.WIN_BLACKMAN_hARRIS, #wintype
@@ -308,6 +329,7 @@ class untitled(gr.top_block, Qt.QWidget):
         self.epy_block_0 = epy_block_0.blk(selected_source=selected_channel)
         self.digital_binary_slicer_fb_0 = digital.binary_slicer_fb()
         self.dcss_generation_0 = dcss_generation(
+            DCS_code_value=selected_DCS,
             audio_sample_rate=24000,
             dcs_active=DCS,
         )
@@ -403,6 +425,7 @@ class untitled(gr.top_block, Qt.QWidget):
     def set_selected_DCS(self, selected_DCS):
         self.selected_DCS = selected_DCS
         self._selected_DCS_callback(self.selected_DCS)
+        self.dcss_generation_0.set_DCS_code_value(self.selected_DCS)
 
     def get_samp_rate(self):
         return self.samp_rate
@@ -457,8 +480,11 @@ class untitled(gr.top_block, Qt.QWidget):
 
 def main(top_block_cls=untitled, options=None):
     if gr.enable_realtime_scheduling() != gr.RT_OK:
-        gr.logger("realtime").warn("Error: failed to enable real-time scheduling.")
+        print("Error: failed to enable real-time scheduling.")
 
+    if StrictVersion("4.5.0") <= StrictVersion(Qt.qVersion()) < StrictVersion("5.0.0"):
+        style = gr.prefs().get_string('qtgui', 'style', 'raster')
+        Qt.QApplication.setGraphicsSystem(style)
     qapp = Qt.QApplication(sys.argv)
 
     tb = top_block_cls()

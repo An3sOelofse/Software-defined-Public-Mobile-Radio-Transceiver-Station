@@ -41,11 +41,13 @@ blocks:
     label: RF Gain
     min_len: '200'
     orient: QtCore.Qt.Horizontal
+    outputmsgname: value
     rangeType: float
+    showports: 'False'
     start: '0'
     step: '1'
     stop: '76'
-    value: '36'
+    value: '40'
     widget: counter_slider
   states:
     bus_sink: false
@@ -62,7 +64,9 @@ blocks:
     label: Sample Rate
     min_len: '200'
     orient: QtCore.Qt.Horizontal
+    outputmsgname: value
     rangeType: float
+    showports: 'False'
     start: '192000'
     step: '1'
     stop: '56000000'
@@ -83,11 +87,13 @@ blocks:
     label: Frequency
     min_len: '200'
     orient: QtCore.Qt.Horizontal
+    outputmsgname: value
     rangeType: float
-    start: '8750'
-    step: '5'
-    stop: '10800'
-    value: '9405'
+    showports: 'False'
+    start: '70000000'
+    step: '200000'
+    stop: '6000000000'
+    value: '446000000'
     widget: counter_slider
   states:
     bus_sink: false
@@ -102,20 +108,56 @@ blocks:
     affinity: ''
     alias: ''
     audio_decim: '8'
-    audio_pass: '16000'
-    audio_stop: '20000'
-    chan_rate: '384000'
+    audio_pass: '1000'
+    audio_stop: '5000'
+    chan_rate: '12800'
     comment: ''
     deviation: '75000'
     gain: '1.0'
     maxoutbuf: '0'
     minoutbuf: '0'
+    tau: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [920, 92.0]
+    rotation: 0
+    state: disabled
+- name: analog_nbfm_rx_0
+  id: analog_nbfm_rx
+  parameters:
+    affinity: ''
+    alias: ''
+    audio_rate: '48000'
+    comment: ''
+    max_dev: 5e3
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    quad_rate: '384000'
     tau: 75e-6
   states:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [912, 220.0]
+    coordinate: [912, 264.0]
+    rotation: 0
+    state: true
+- name: analog_simple_squelch_cc_0
+  id: analog_simple_squelch_cc
+  parameters:
+    affinity: ''
+    alias: ''
+    alpha: '1'
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    threshold: '-50'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [712, 272.0]
     rotation: 0
     state: true
 - name: audio_sink_0
@@ -141,7 +183,7 @@ blocks:
     affinity: ''
     alias: ''
     comment: ''
-    const: '0.5'
+    const: '0.3'
     maxoutbuf: '0'
     minoutbuf: '0'
     type: float
@@ -150,7 +192,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1144, 224.0]
+    coordinate: [1136, 272.0]
     rotation: 0
     state: true
 - name: qtgui_sink_x_0
@@ -160,8 +202,8 @@ blocks:
     alias: ''
     bw: samp_rate
     comment: ''
-    fc: tuning*10000
-    fftsize: '32768'
+    fc: tuning
+    fftsize: '1024'
     gui_hint: ''
     maxoutbuf: '0'
     minoutbuf: '0'
@@ -170,9 +212,9 @@ blocks:
     plotfreq: 'True'
     plottime: 'True'
     plotwaterfall: 'True'
-    rate: '30'
+    rate: '100'
     showports: 'False'
-    showrf: 'True'
+    showrf: 'False'
     type: complex
     wintype: window.WIN_BLACKMAN_hARRIS
   states:
@@ -180,6 +222,35 @@ blocks:
     bus_source: false
     bus_structure: null
     coordinate: [792, 424.0]
+    rotation: 0
+    state: true
+- name: qtgui_sink_x_0_0
+  id: qtgui_sink_x
+  parameters:
+    affinity: ''
+    alias: ''
+    bw: samp_rate/5
+    comment: ''
+    fc: tuning
+    fftsize: '1024'
+    gui_hint: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    name: '"Zoomed"'
+    plotconst: 'True'
+    plotfreq: 'True'
+    plottime: 'True'
+    plotwaterfall: 'True'
+    rate: '100'
+    showports: 'False'
+    showrf: 'False'
+    type: complex
+    wintype: window.WIN_BLACKMAN_hARRIS
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1064, 384.0]
     rotation: 0
     state: true
 - name: rational_resampler_xxx_0
@@ -199,9 +270,9 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [640, 312.0]
+    coordinate: [496, 248.0]
     rotation: 0
-    state: true
+    state: enabled
 - name: uhd_usrp_source_0
   id: uhd_usrp_source
   parameters:
@@ -271,7 +342,7 @@ blocks:
     bw7: '0'
     bw8: '0'
     bw9: '0'
-    center_freq0: tuning*10000
+    center_freq0: tuning
     center_freq1: '0'
     center_freq10: '0'
     center_freq11: '0'
@@ -640,12 +711,14 @@ blocks:
     state: true
 
 connections:
-- [analog_fm_demod_cf_0, '0', blocks_multiply_const_vxx_0, '0']
+- [analog_nbfm_rx_0, '0', blocks_multiply_const_vxx_0, '0']
+- [analog_simple_squelch_cc_0, '0', analog_nbfm_rx_0, '0']
 - [blocks_multiply_const_vxx_0, '0', audio_sink_0, '0']
-- [rational_resampler_xxx_0, '0', analog_fm_demod_cf_0, '0']
+- [rational_resampler_xxx_0, '0', analog_simple_squelch_cc_0, '0']
+- [rational_resampler_xxx_0, '0', qtgui_sink_x_0_0, '0']
 - [uhd_usrp_source_0, '0', qtgui_sink_x_0, '0']
 - [uhd_usrp_source_0, '0', rational_resampler_xxx_0, '0']
 
 metadata:
   file_format: 1
-  grc_version: 3.10.9.2
+  grc_version: 3.10.4.0
