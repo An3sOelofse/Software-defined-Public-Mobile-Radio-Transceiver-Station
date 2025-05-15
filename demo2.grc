@@ -11,7 +11,7 @@ options:
     gen_linking: dynamic
     generate_options: qt_gui
     hier_block_src_path: '.:'
-    id: untitled
+    id: pmr_walkie_talkie
     max_nouts: '0'
     output_language: python
     placement: (0,0)
@@ -351,6 +351,7 @@ blocks:
 - name: dcss_generation_0
   id: dcss_generation
   parameters:
+    DCS_code_value: '0'
     affinity: ''
     alias: ''
     audio_sample_rate: '24000'
